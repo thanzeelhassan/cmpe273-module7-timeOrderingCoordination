@@ -1,0 +1,17 @@
+
+===== Scenario 1: versioned event ordering (delivery order: v2, v1, v2 again) =====
+18:24:14.431 [network] delivering order_id=ORD-1001 version=2 status=PAID  (arrives FIRST, out of order)
+18:24:14.431 [store] received  order_id=ORD-1001 version=2 status=PAID  (current version=0)
+18:24:14.431 [store] BUFFERED  version 2 is PENDING, waiting for missing version(s) [1]
+18:24:14.431 [store] state: order_id=ORD-1001 status=None version=0 history=[(empty)] pending=[2] missing=[1]
+18:24:14.431 [network] delivering order_id=ORD-1001 version=1 status=CREATED  (arrives LATE)
+18:24:14.431 [store] received  order_id=ORD-1001 version=1 status=CREATED  (current version=0)
+18:24:14.431 [store] APPLIED   version 1: (none) -> CREATED
+18:24:14.431 [store] gap filled -> releasing buffered version 2
+18:24:14.431 [store] APPLIED   version 2: CREATED -> PAID
+18:24:14.431 [store] state: order_id=ORD-1001 status=PAID version=2 history=[CREATED -> PAID] pending=none missing=none
+18:24:14.431 [network] delivering order_id=ORD-1001 version=2 status=PAID  (DUPLICATE delivery)
+18:24:14.431 [store] received  order_id=ORD-1001 version=2 status=PAID  (current version=2)
+18:24:14.431 [store] DUPLICATE version 2 already applied -> ignored
+18:24:14.431 [store] final: order_id=ORD-1001 status=PAID version=2 history=[CREATED -> PAID] pending=none missing=none
+18:24:14.431 [check] PASS: applied in order CREATED -> PAID, duplicate ignored

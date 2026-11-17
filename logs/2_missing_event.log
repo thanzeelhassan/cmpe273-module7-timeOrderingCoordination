@@ -1,0 +1,18 @@
+
+===== Scenario 2: missing event (v1 applied, then only v3 arrives; v2 is missing) =====
+18:24:14.472 [network] delivering order_id=ORD-2002 version=1 status=CREATED
+18:24:14.472 [store] received  order_id=ORD-2002 version=1 status=CREATED  (current version=0)
+18:24:14.472 [store] APPLIED   version 1: (none) -> CREATED
+18:24:14.472 [network] delivering order_id=ORD-2002 version=3 status=SHIPPED  (v2 never arrived)
+18:24:14.472 [store] received  order_id=ORD-2002 version=3 status=SHIPPED  (current version=1)
+18:24:14.472 [store] BUFFERED  version 3 is PENDING, waiting for missing version(s) [2]
+18:24:14.472 [store] state: order_id=ORD-2002 status=CREATED version=1 history=[CREATED] pending=[3] missing=[2]
+18:24:14.472 [check] PASS: order did NOT jump to SHIPPED; version 2 detected as missing, version 3 recorded as pending
+--- extra: the missing version finally shows up ---
+18:24:14.472 [network] delivering order_id=ORD-2002 version=2 status=PAID  (very late)
+18:24:14.472 [store] received  order_id=ORD-2002 version=2 status=PAID  (current version=1)
+18:24:14.472 [store] APPLIED   version 2: CREATED -> PAID
+18:24:14.472 [store] gap filled -> releasing buffered version 3
+18:24:14.472 [store] APPLIED   version 3: PAID -> SHIPPED
+18:24:14.472 [store] final: order_id=ORD-2002 status=SHIPPED version=3 history=[CREATED -> PAID -> SHIPPED] pending=none missing=none
+18:24:14.472 [check] PASS: gap filled, buffered version 3 applied in the correct order

@@ -1,0 +1,27 @@
+
+===== Scenario 3: stale worker (two workers, fencing tokens) =====
+18:24:14.503 [network] delivering order_id=ORD-3003 version=1 status=CREATED
+18:24:14.503 [store] received  order_id=ORD-3003 version=1 status=CREATED  (current version=0)
+18:24:14.503 [store] APPLIED   version 1: (none) -> CREATED
+18:24:14.503 [lock-service] lease on ORD-3003 granted to worker-A with fencing token=1 (expires t=5)
+18:24:14.503 [worker-A] got token=1, read order at version 1, about to mark it PAID ...
+18:24:14.503 [worker-A] PAUSED (long GC pause / network stall) - it still believes it holds the lease
+18:24:14.503 [lock-service] clock advanced to t=10
+18:24:14.503 [lock-service] lease of worker-A (token=1) on ORD-3003 EXPIRED
+18:24:14.503 [lock-service] lease on ORD-3003 granted to worker-B with fencing token=2 (expires t=15)
+18:24:14.503 [worker-B] got token=2, marking order PAID
+18:24:14.503 [store] write from worker-B token=2  order_id=ORD-3003 version=2 status=PAID  (highest token seen=0)
+18:24:14.503 [store] ACCEPTED  token 2 is current
+18:24:14.503 [store] received  order_id=ORD-3003 version=2 status=PAID  (current version=1)
+18:24:14.503 [store] APPLIED   version 2: CREATED -> PAID
+18:24:14.503 [worker-A] RESUMED, unaware its lease expired; writing with old token=1
+18:24:14.503 [store] write from worker-A token=1  order_id=ORD-3003 version=2 status=PAID  (highest token seen=2)
+18:24:14.503 [store] REJECTED  worker-A is STALE: token 1 < 2 -> order left unchanged
+18:24:14.503 [worker-A] write result: REJECTED_STALE_TOKEN
+18:24:14.503 [worker-B] shipping the order
+18:24:14.503 [store] write from worker-B token=2  order_id=ORD-3003 version=3 status=SHIPPED  (highest token seen=2)
+18:24:14.503 [store] ACCEPTED  token 2 is current
+18:24:14.503 [store] received  order_id=ORD-3003 version=3 status=SHIPPED  (current version=2)
+18:24:14.503 [store] APPLIED   version 3: PAID -> SHIPPED
+18:24:14.503 [store] final: order_id=ORD-3003 status=SHIPPED version=3 history=[CREATED -> PAID -> SHIPPED] pending=none missing=none
+18:24:14.503 [check] PASS: newer token 2 accepted, older token 1 rejected
